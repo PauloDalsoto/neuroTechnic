@@ -26,9 +26,10 @@ def get_data(serial):
     """Obtém um valor de dados da porta serial."""
     # return random.uniform(0, 1)
     try:
-        data = serial.readline().decode().strip()
-        if data:
-            return float(data)
+        if serial.in_waiting > 0:
+            data = serial.readline().decode().strip()
+            if data:
+                return float(data)
             
     except Exception as e:
         print(f"Erro ao ler ou converter dados: {e}")
