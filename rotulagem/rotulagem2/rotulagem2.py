@@ -10,10 +10,10 @@ porta_serial = 'COM7'  # Porta serial a ser lida
 baud_rate = 115200  # Velocidade de comunicação
     
 # Caminhos para os arquivos de áudio
-conc_song = 'rotulagem2/musicas/conc-song.mp3'    # Música tocada durante o período de concentração
-relax_song = 'rotulagem2/musicas/relax-song.mp3'  # Música tocada durante o período de relaxamento
-start_conc = 'rotulagem2/musicas/start-conc.mp3'  # Alerta inicial para começar a concentração
-end_conc = 'rotulagem2/musicas/end-conc.mp3'      # Alerta final para terminar a concentração
+conc_song = 'rotulagem/rotulagem2/musicas/conc-song.mp3'    # Música tocada durante o período de concentração
+relax_song = 'rotulagem/rotulagem2/musicas/relax-song.mp3'  # Música tocada durante o período de relaxamento
+start_conc = 'rotulagem/rotulagem2/musicas/start-conc.mp3'  # Alerta inicial para começar a concentração
+end_conc = 'rotulagem/rotulagem2/musicas/end-conc.mp3'      # Alerta final para terminar a concentração
 
 # Inicializa o pygame para tocar sons
 pygame.mixer.init()
@@ -38,6 +38,9 @@ def get_data(serial):
     
 def log_data(measured_value, concentration):
     """Registra o valor medido e o estado de concentração no DataFrame."""
+    if measured_value is None:
+        return
+    
     global df
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     new_row = pd.DataFrame({'VALUE': [measured_value], 'TIMESTAMP': [timestamp], 'CONCENTRATION': [concentration]})
@@ -54,6 +57,7 @@ def main():
     
     # Abre a porta serial
     ser = serial.Serial(porta_serial, baud_rate)
+    ser.reset_input_buffer()
     print(f"Porta serial {porta_serial} aberta com sucesso.")
     
     try:
