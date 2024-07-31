@@ -42,7 +42,7 @@ def log_data(measured_value, concentration):
         return
     
     global df
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-4]
     new_row = pd.DataFrame({'VALUE': [measured_value], 'TIMESTAMP': [timestamp], 'CONCENTRATION': [concentration]})
     df = pd.concat([df, new_row], ignore_index=True)
     print(f"{timestamp} | {measured_value:^8} | {concentration}")
