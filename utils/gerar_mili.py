@@ -47,7 +47,7 @@ def adicionar_milissegundos(df):
 
 
 # Ler o CSV
-input_file = 'data/errados/bci_data_SEM_FRA3.csv'
+input_file = 'data/bci_data_correto5.csv'
 output_file = 'aa.csv'
 
 
