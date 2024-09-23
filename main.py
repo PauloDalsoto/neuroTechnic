@@ -9,14 +9,14 @@ cutoff = 51                  # Frequência de corte em Hz
 frequencia_amostragem = 250  # Taxa de amostragem média em Hz (ajustada para EEG típico)
 fixed_length = 348           # Comprimento fixo para interpolação dos dados de FFT
 
-def main(serial_conn, model_path):
+def main(serial_esp32, serial_uno, model_path):
     """Função principal para leitura de dados e processamento."""
     data_window = []
     model = load_model(model_path)
 
     while True:
-        # data = get_data(serial_conn)
-        data = random.uniform(0, 1)
+        data = get_data(serial_esp32)
+        
         print(f"Valor medido: ", data)
         if data is not None:
             timestamp = pd.Timestamp.now()
@@ -31,6 +31,7 @@ def main(serial_conn, model_path):
                 prediction = classify_signal(model, features)
                 if prediction == 1:  
                     print("Concentração detectada!")
+                    serial_uno.write(b'ON\n') 
                     time.sleep(5)
                 else:
                     print("...")
@@ -41,10 +42,11 @@ def main(serial_conn, model_path):
 
 # Executa a função principal ao iniciar o script
 if __name__ == "__main__":
-    porta_serial = 'COM7'                         # Porta serial
-    baud_rate = 115200                            # Velocidade de comunicação
     model_path = './utils/GB_mlp.pkl'    # Caminho do modelo
 
-    # serial_conn = serial.Serial(porta_serial, baud_rate)
-    serial_conn = 1
-    main(serial_conn, model_path)
+    serial_esp32 = serial.Serial('COM7', 115200)
+    serial_uno = serial.Serial('COM10', 9600)
+    time.sleep(2)
+    print("Conexões estabelecidas!")
+    
+    main(serial_esp32, serial_uno, model_path)
