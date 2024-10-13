@@ -48,20 +48,26 @@ def extract_wavelet_features(data, wavelet='db4'):
         wavelet_features.extend([np.mean(coeff), np.var(coeff), np.min(coeff), np.max(coeff)])
     return wavelet_features
 
-def process_window(window, cutoff, fixed_length):
+def process_window(window, cutoff, fixed_length, filter_fft ):
     """Processa uma janela de dados, aplicando filtro e extraindo features."""
     values = window['VALUE'].values - np.mean(window['VALUE'].values)
+    
+    # Taxa de amostragem
     timestamp_diff = window['TIMESTAMP'].diff().dt.total_seconds()
     sampling_rate = 1 / timestamp_diff[timestamp_diff > 0].mean()
 
+    # FFT
     fft_values = np.abs(fft(values))[:len(values) // 2]
-    freqs = np.fft.fftfreq(len(values), d=1 / sampling_rate)[:len(values) // 2]
-    fft_values_filtered = fft_values[freqs <= (cutoff + 5)]
-    fft_values_filtered = pad_or_interpolate(fft_values_filtered, fixed_length)
-
+    
+    if filter_fft:
+        freqs = np.fft.fftfreq(len(values), d=1 / sampling_rate)[:len(values) // 2]
+        fft_values_filtered = fft_values[freqs <= (cutoff + 5)]
+        fft_values_filtered = pad_or_interpolate(fft_values_filtered, fixed_length)
+        fft_values = fft_values_filtered
+        
     wavelet_features = extract_wavelet_features(values)
 
-    features = list(fft_values_filtered) + list(wavelet_features)
+    features = list(fft_values) + list(wavelet_features)
     return features
 
 def load_model(model_path):
@@ -71,5 +77,9 @@ def load_model(model_path):
 
 def classify_signal(model, features):
     """Classifica o sinal com base nas features extraídas."""
+    # with open('features.txt', 'w') as f:
+    #     for feature in features:
+    #         f.write(f"{feature}\n")
+    
     prediction = model.predict([features])
     return prediction[0]
